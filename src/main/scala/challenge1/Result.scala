@@ -46,7 +46,10 @@ sealed trait Result[A] {
   def fold[X](
     fail: Error => X,
     ok: A => X
-  ): X = ???
+  ): X = this match {
+    case Fail(error) => fail(error)
+    case Ok(value) => ok(value)
+  }
 
   /*
    * Exercise 1.2:
@@ -65,8 +68,7 @@ sealed trait Result[A] {
    *
    * Advanced: Try using flatMap.
    */
-  def map[B](f: A => B): Result[B] =
-    ???
+  def map[B](f: A => B): Result[B] = fold(Result.fail, f andThen Result.ok)
 
 
   /*
@@ -91,8 +93,7 @@ sealed trait Result[A] {
    *
    * Advanced: Try using fold.
    */
-  def flatMap[B](f: A => Result[B]): Result[B] =
-    ???
+  def flatMap[B](f: A => Result[B]): Result[B] = fold(Result.fail, f)
 
 
   /*
@@ -107,8 +108,7 @@ sealed trait Result[A] {
    * scala> Fail(NotFound).getOrElse(10)
    *  = 10
    */
-  def getOrElse(otherwise: => A): A =
-    ???
+  def getOrElse(otherwise: => A): A = fold(_ => otherwise, identity)
 
 
   /*
@@ -129,8 +129,7 @@ sealed trait Result[A] {
    * scala> Fail[Int](NotFound) ||| Fail[Int](Unauthorized)
    *  = Fail(Unauthorized)
    */
-  def |||(alternative: => Result[A]): Result[A] =
-    ???
+  def |||(alternative: => Result[A]): Result[A] = fold(_ => alternative, Result.ok)
 }
 
 object Result {
