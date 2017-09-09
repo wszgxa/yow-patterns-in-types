@@ -81,7 +81,12 @@ object Warmup {
    * resX: List[Int] = List(1, 2, 3, 4, 5, 6, 7, 8)
    */
   def append[A](x: List[A], y: List[A]): List[A] =
-    ???
+    x.foldRight(y)((xs, acc) => xs::acc)
+//    x match {
+//      case Nil => y
+//      case z :: zs =>
+//        z :: append(zs, y)
+//    }
 
   /*
    * Exercise: 0.2:
@@ -100,7 +105,12 @@ object Warmup {
    *     not infer what you mean.
    */
   def map[A, B](xs: List[A])(f: A => B): List[B] =
-    ???
+//    xs.foldRight(List[B]())((x, acc) => f(x)::acc)
+    xs match {
+      case Nil => List()
+      case z :: zs =>
+        f(z) :: map(zs)(f)
+    }
 
   /*
    * Exercise: 0.3:
@@ -112,7 +122,11 @@ object Warmup {
    * resX: List[Int] = List(1, 2)
    */
   def filter[A](xs: List[A])(p: A => Boolean): List[A] =
-    ???
+    xs.foldRight(List[A]())((x, acc) => if(p(x)) x::acc else acc  )
+//    xs match {
+//      case Nil => List()
+//      case z :: zs => if (p(z)) z :: zs else zs
+//    }
 
   /*
    * Exercise: 0.4:
@@ -133,7 +147,7 @@ object Warmup {
    *     not infer what you mean.
    */
   def reverse[A](xs: List[A]): List[A] =
-    ???
+    xs.foldLeft(List[A]())((acc, x) => x::acc)
 
   /*
    * *Challenge* Exercise: 0.5:
@@ -154,6 +168,6 @@ object Warmup {
    * ~~~ library hint: use can just use List[A]#sorted to sort the list before you start.
    * ~~~ library hint: List[A]#min and List#max exist.
    */
-  def ranges(xs: List[Int]): List[(Int, Int)] =
-    ???
+  def ranges(xs: List[Int]): List[(Int, Int)] = ???
+
 }
