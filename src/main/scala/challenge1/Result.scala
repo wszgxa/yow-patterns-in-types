@@ -179,11 +179,16 @@ object Example {
    * Hint: Scala defines String#toInt, but warning it throws exceptions if it is not a valid Int :|
    */
   def request(body: String): Result[Int] =
-    ???
+    try {Result.ok(body.toInt)} catch { case _ : Throwable  => Result.fail(InvalidRequest) }
 
   /* Parse the method if it is valid, otherwise fail with InvalidMethod. */
-  def method(method: String): Result[Method] =
-    ???
+  def method(method: String): Result[Method] = method.toLowerCase match {
+    case "get" => Result.ok(Get)
+    case "post" => Result.ok(Post)
+    case "put" => Result.ok(Put)
+    case "delete" => Result.ok(Delete)
+    case _ => Result.fail(InvalidMethod)
+  }
 
   /*
    * Route method and path to an implementation.
@@ -197,8 +202,13 @@ object Example {
    *   DELETE *    -> Unauthorized
    *   *           -> NotFound
    */
-  def route(method: Method, path: String): Result[Int => Int] =
-    ???
+  def route(method: Method, path: String): Result[Int => Int] = (method, path) match {
+    case (Get, "/single") => Result.ok((t:Int) => 1 * t)
+    case (Get, "/double") => Result.ok(2 * (_: Int))
+    case (Get, "/triple") => Result.ok(3 * (_: Int))
+    case (Put, _) | (Post, _) | (Delete, _) => Result.fail(Unauthorized)
+    case _ => Result.fail(NotFound)
+  }
 
   /*
    * Attempt to compute an `answer`, by:
@@ -207,13 +217,16 @@ object Example {
    *  - determing request value
    *  - using the implementation and request value to compute an answer.
    */
-  def service(path: String, methodx: String, body: String): Result[Int] =
-    ???
+  def service(path: String, methodx: String, body: String): Result[Int] = for {
+    method <- method(methodx)
+    algorithm <- route(method, path)
+    request <- request(body)
+  } yield algorithm(request)
 
   /*
    * Sometimes we always an `answer`, so default to 0 if
    * our request failed in any way.
    */
   def run(path: String, method: String, body: String): Int =
-    ???
+    service(path, method, body).getOrElse(0)
 }
